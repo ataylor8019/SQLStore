@@ -1,0 +1,98 @@
+Deployment Instructions for deliverable: Pizza Maker Order Conversion
+
+Prerequisites:
+
+A modern Windows system capable of running a .Net executable.
+A Visual Studio capable of compiling using .Net Framework 4.6 and up (if intent is to compile from source).
+A system running SQL Server 2014 or up.
+A database named PIZZALOGISTICS on the previously mentioned system.
+
+Required downloads -
+From github.com/ataylor8019/SQLStore -
+
+SetupPizzaMakerFileFlattenTables.sql
+SetupPizzaMakerFileFlattenRawTextFileLoad.sql
+SetupCUSTOMERLOAD_PROCEDURE.sql
+SetupMENULOAD_PROCEDURE.sql
+SetupORDERSLOAD_PROCEDURE.sql
+SetupORDEREDITEMSLOAD_PROCEDURE.sql
+
+From github.com/ataylor8019/PizzaRecordConvertor -
+Download the solution PizzaRecordConvertor from branch "master" or executable "PizzaRecordConvertor.exe" from (to be updated in future release)
+
+From github.com/ataylor8019/WinDos_batch_repository
+PizzaMakerSyncProcess.bat
+
+Setup instructions:
+
+On system which will run the record conversion:
+
+Compile the solution PizzaRecordConvertor, if you did not download the EXE.
+Ensure that the exe (whether gotten from the site or compiled) is placed where there are no sensitive files or directories.
+Place the files to be converted in a location where there are no sensitive files or directories.
+Start the executable (by clicking the icon or using the Run command in Windows)
+Use the buttons to point the executable to the location of the order files to be converted.
+Press the appropriate button (saying something like "begin order conversion") to begin the order conversion.
+
+If successful, the import data will be in a file named "ImportReadyData.txt" in a subfolder named "DatabaseReadyFiles".
+Any order files that were not read will be in a subfolder named "FailedOrderReads".
+Any errors encountered during the read will be in a subfolder named "Errors".
+Files that were successfully read will remain in the location where they were placed.
+
+On system that will store the records (may or may not be the same as the record conversion system):
+
+Ensure that all of the named SQL files and PizzaMakerSyncProcess.bat are on the record system.
+Ensure that the file "ImportReadyData.txt" is on the record system.
+"PizzaMakerSyncProcess.bat" should be placed where only trusted users can access it, and regularly monitored for changes.
+
+Run the SQL files in the following order:
+
+SetupPizzaMakerFileFlattenTables.sql
+SetupCUSTOMERLOAD_PROCEDURE.sql
+SetupMENULOAD_PROCEDURE.sql
+SetupORDERSLOAD_PROCEDURE.sql
+SetupORDEREDITEMSLOAD_PROCEDURE.sql
+
+If not already done, "PizzaMakerSyncProcess.bat" should be edited to point to the location where the import file is located. If the location has been preset, then skip the next section.
+
+Open "PizzaMakerSyncProcess.bat". The file contains the following:
+---
+
+@ECHO OFF
+SETLOCAL ENABLEDELAYEDEXPANSION
+
+sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d PIZZALOGISTICS -Q "EXEC SetupPizzaInformationStore"
+sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d PIZZALOGISTICS -Q "EXEC BULKPIZZADATA_RAWIMPORT @FILENAME=$(IMPORTFILE)" -v IMPORTFILE=""
+sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d PIZZALOGISTICS -Q "EXEC CUSTOMERLOAD"
+sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d PIZZALOGISTICS -Q "EXEC MENULOAD"
+sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d PIZZALOGISTICS -Q "EXEC ORDERSLOAD"
+sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d PIZZALOGISTICS -Q "EXEC ORDEREDITEMSLOAD"
+
+
+---
+
+Edit the 4th line of text to look like the following:
+
+sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d TestPizzaImport -Q "EXEC BULKPIZZADATA_RAWIMPORT @FILENAME=$(IMPORTFILE)" -v IMPORTFILE="'[FileLocation]\ImportReadyData.txt'"
+
+The text [FileLocation] should be replaced with the location of the file "ImportReadyData.txt" on the system. Type everything else, including quotes, exactly as shown above.
+
+
+Run the following SQL file:
+
+SetupPizzaMakerFileFlattenRawTextFileLoad.sql
+
+The process is now ready to be run.
+
+
+Import instructions:
+
+Simply run "PizzaMakerSyncProcess.bat" at the command line in the location where it has been placed. 
+
+File data will be output into the following tables:
+
+CUSTOMERS
+MENU
+ORDERS
+ORDEREDITEMS
+
