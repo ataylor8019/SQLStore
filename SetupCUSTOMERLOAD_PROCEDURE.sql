@@ -1,4 +1,4 @@
-USE [TESTPIZZAIMPORT]
+USE [PIZZALOGISTICS]
 GO
 
 IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.ROUTINES 
@@ -59,7 +59,7 @@ WHILE @@FETCH_STATUS = 0
     		             ,REPLACE(@inHOMEADDRESS,'"','') AS ADDR
     		       WHERE NOT EXISTS (SELECT 1 FROM CUSTOMERS c 
     			                     WHERE REPLACE(@inFIRSTNAME,'"','') = c.[FIRSTNAME] 
-    								  AND  REPLACE(@inMIDDLEINITIAL,'"','') = c.[MIDDLEINITIAL]
+    								  AND REPLACE(@inMIDDLEINITIAL,'"','') = c.[MIDDLEINITIAL]
     		                          AND REPLACE(@inLASTNAME,'"','')  = c.[LASTNAME] 
     								  AND REPLACE(@inPHONENUMBER,'"','') = c.[PHONENUMBER]
     		                          AND REPLACE(@inHOMEADDRESS,'"','') = c.[HOMEADDRESS]);
