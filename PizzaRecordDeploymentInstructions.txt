@@ -73,7 +73,7 @@ sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d PIZZALOGISTICS -Q "EXEC ORDER
 
 Edit the 4th line of text to look like the following:
 
-sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d TestPizzaImport -Q "EXEC BULKPIZZADATA_RAWIMPORT @FILENAME=$(IMPORTFILE)" -v IMPORTFILE="'[FileLocation]\ImportReadyData.txt'"
+sqlcmd -Snp:\\.\pipe\MSSQL$SQLEXPRESS\sql\query -d PIZZALOGISTICS -Q "EXEC BULKPIZZADATA_RAWIMPORT @FILENAME=$(IMPORTFILE)" -v IMPORTFILE="'[FileLocation]\ImportReadyData.txt'"
 
 The text [FileLocation] should be replaced with the location of the file "ImportReadyData.txt" on the system. Type everything else, including quotes, exactly as shown above.
 
